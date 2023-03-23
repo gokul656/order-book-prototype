@@ -14,12 +14,15 @@ public class DemoApplication {
 		OrderBook orderBook = new OrderBook(new Security());
 
 		Order bidOrder = Order.builder()
+				.orderId(1L)
 				.price(new BigInteger("100"))
 				.initialQty(10)
 				.refId(UUID.randomUUID().toString())
 				.orderSide(OrderSide.BUY)
 				.build();
+
 		Order askOrder = Order.builder()
+				.orderId(2L)
 				.price(new BigInteger("100"))
 				.initialQty(10)
 				.orderSide(OrderSide.SELL)

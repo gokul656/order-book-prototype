@@ -13,9 +13,9 @@ public class OrderBook implements IOrderBookRetrieval {
 
     private final Security security;
 
-    private ConcurrentHashMap<Long, OrderBookEntry> orders = new ConcurrentHashMap<>();
-    private SortedSet<Limit> bidLimits = new TreeSet<>();
-    private SortedSet<Limit> askLimits = new TreeSet<>();
+    private final ConcurrentHashMap<Long, OrderBookEntry> orders = new ConcurrentHashMap<>();
+    private final SortedSet<Limit> bidLimits = new TreeSet<>();
+    private final SortedSet<Limit> askLimits = new TreeSet<>();
 
     public OrderBook(Security security) {
         this.security = security;
@@ -25,9 +25,9 @@ public class OrderBook implements IOrderBookRetrieval {
     public List<OrderBookEntry> getBidOrders() {
         List<OrderBookEntry> orderBookEntries = new ArrayList<>();
         bidLimits.forEach(
-                askLimit -> {
-                    if (!askLimit.isEmpty()) {
-                        OrderBookEntry bidLimitPointer = askLimit.head;
+                bidLimit -> {
+                    if (!bidLimit.isEmpty()) {
+                        OrderBookEntry bidLimitPointer = bidLimit.head;
                         while (bidLimitPointer != null) {
                             orderBookEntries.add(bidLimitPointer);
                             bidLimitPointer = bidLimitPointer.next;
@@ -67,7 +67,7 @@ public class OrderBook implements IOrderBookRetrieval {
      * @param baseLimit - Parent limit
      */
     private void addOrder(Order order, Limit baseLimit, SortedSet<Limit> limitLevels, ConcurrentHashMap<Long, OrderBookEntry> internalOrderBook) {
-        Limit limit = limitLevels.contains(baseLimit) ? limitLevels.stream().filter(it -> it.head.equals(baseLimit.head)).findFirst().orElse(null) : null;
+        Limit limit = limitLevels.contains(baseLimit) ? limitLevels.stream().filter(it -> it.getPrice().equals(baseLimit.getPrice())).findFirst().orElse(null) : null;
         if (limit != null) {
             OrderBookEntry orderBookEntry = new OrderBookEntry(order, baseLimit);
 
@@ -81,7 +81,7 @@ public class OrderBook implements IOrderBookRetrieval {
             }
 
             limit.tail = orderBookEntry;
-            internalOrderBook.put(order.orderId, orderBookEntry);
+            internalOrderBook.putIfAbsent(order.orderId, orderBookEntry);
         } else {
             limitLevels.add(baseLimit);
             OrderBookEntry orderBookEntry = new OrderBookEntry(order, baseLimit);
@@ -89,7 +89,7 @@ public class OrderBook implements IOrderBookRetrieval {
             // Tail and head points to same order because it's the only order in the orderbook
             baseLimit.head = orderBookEntry;
             baseLimit.tail = orderBookEntry;
-            internalOrderBook.put(order.orderId, orderBookEntry);
+            internalOrderBook.putIfAbsent(order.orderId, orderBookEntry);
         }
     }
 
