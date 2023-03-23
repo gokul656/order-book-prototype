@@ -7,12 +7,13 @@ import com.example.demo.orderModule.OrderSide;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OrderBook implements IOrderBookRetrieval {
 
     private final Security security;
 
-    private HashMap<Long, OrderBookEntry> orders = new HashMap<>();
+    private ConcurrentHashMap<Long, OrderBookEntry> orders = new ConcurrentHashMap<>();
     private SortedSet<Limit> bidLimits = new TreeSet<>();
     private SortedSet<Limit> askLimits = new TreeSet<>();
 
@@ -65,7 +66,7 @@ public class OrderBook implements IOrderBookRetrieval {
     /**
      * @param baseLimit - Parent limit
      */
-    private void addOrder(Order order, Limit baseLimit, SortedSet<Limit> limitLevels, HashMap<Long, OrderBookEntry> internalOrderBook) {
+    private void addOrder(Order order, Limit baseLimit, SortedSet<Limit> limitLevels, ConcurrentHashMap<Long, OrderBookEntry> internalOrderBook) {
         Limit limit = limitLevels.contains(baseLimit) ? limitLevels.stream().filter(it -> it.head.equals(baseLimit.head)).findFirst().orElse(null) : null;
         if (limit != null) {
             OrderBookEntry orderBookEntry = new OrderBookEntry(order, baseLimit);
@@ -110,7 +111,7 @@ public class OrderBook implements IOrderBookRetrieval {
         }
     }
 
-    private void removeOrder(Long orderId, OrderBookEntry orderBookEntry, HashMap<Long, OrderBookEntry> internalOrderBook) {
+    private void removeOrder(Long orderId, OrderBookEntry orderBookEntry, ConcurrentHashMap<Long, OrderBookEntry> internalOrderBook) {
         // Rewiring prev and next orders
         if (orderBookEntry.previous != null && orderBookEntry.next != null) {
             orderBookEntry.next.previous = orderBookEntry.previous;

@@ -15,8 +15,8 @@ public class OrderBookEntry {
     public OrderBookEntry next;
     public OrderBookEntry previous;
 
-    public OrderBookEntry(Order order, Limit baseLimit) {
+    public OrderBookEntry(Order order, Limit parentLimit) {
         this.currentOrder = order;
-        this.parentLimit = baseLimit;
+        this.parentLimit = parentLimit;
     }
 }
